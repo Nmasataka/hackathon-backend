@@ -47,10 +47,10 @@ func init() {
 	mysqlUserPwd := os.Getenv("MYSQL_PWD")
 	mysqlHost := os.Getenv("MYSQL_HOST")
 	mysqlDatabase := os.Getenv("MYSQL_DATABASE")
-	//log.Printf("mysqlUser: %s, mysqlUserPwd: %s, mysqlHost: %s, mysqlDatabase: %s", mysqlUser, mysqlUserPwd, mysqlHost, mysqlDatabase)
+	log.Printf("mysqlUser: %s, mysqlUserPwd: %s, mysqlHost: %s, mysqlDatabase: %s", mysqlUser, mysqlUserPwd, mysqlHost, mysqlDatabase)
 
 	connStr := fmt.Sprintf("%s:%s@%s/%s", mysqlUser, mysqlUserPwd, mysqlHost, mysqlDatabase)
-	log.Printf(connStr)
+	//log.Printf(connStr)
 	_db, err := sql.Open("mysql", connStr)
 
 	// ①-1
