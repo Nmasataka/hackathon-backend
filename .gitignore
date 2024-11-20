@@ -1,0 +1,13 @@
+# IDE設定ファイルを無視
+.idea/
+
+# OSの不要ファイル
+.DS_Store
+Thumbs.db
+
+# ビルド生成物を無視
+node_modules/
+dist/
+
+# 環境変数ファイルを無視
+.env
