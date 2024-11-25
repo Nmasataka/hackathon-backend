@@ -95,7 +95,6 @@ func posttweet(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
 		if err := tx.Commit(); err != nil {
 			log.Printf("fail: tx.Commit, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -128,7 +127,6 @@ func getAllTweets(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	case http.MethodGet:
-
 		uid := r.URL.Query().Get("uid") // To be filled
 		if uid == "" {
 			log.Println("fail: uid is empty")
@@ -143,7 +141,7 @@ func getAllTweets(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		users := make([]models.TweetListForHTTPGET, 0)
+		tweets := make([]models.TweetListForHTTPGET, 0)
 		for rows.Next() {
 			var u models.TweetListForHTTPGET
 			var createdAt []byte // まずバイト列で受け取る
@@ -165,10 +163,10 @@ func getAllTweets(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			users = append(users, u)
+			tweets = append(tweets, u)
 		}
 
-		bytes, err := json.Marshal(users)
+		bytes, err := json.Marshal(tweets)
 		if err != nil {
 			log.Printf("fail: json.Marshal, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
