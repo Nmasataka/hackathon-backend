@@ -1,26 +1,20 @@
-package main
+package handler
 
 import (
 	"encoding/json"
 	"github.com/oklog/ulid"
 	"hackathon-backend/database"
-	"hackathon-backend/handler"
 	"hackathon-backend/models"
 	"log"
 	"math/rand"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
-
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/oklog/ulid/v2"
 )
 
 var entropy = ulid.Monotonic(rand.New(rand.NewSource(time.Now().UnixNano())), 0)
 
-func posttweet(w http.ResponseWriter, r *http.Request) {
+// ② /userでリクエストされたらnameパラメーターと一致する名前を持つレコードをJSON形式で返す
+func Handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -73,13 +67,24 @@ func posttweet(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bytes)
 	case http.MethodPost:
-		var req models.TweetForHTTPPOST
+		var req models.UserInputFromHTTPPost
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
 			log.Printf("fail: json.NewDecoder.Decode, %v\n", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+
+		if req.Name == "" || len(req.Name) > 50 {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if req.Age < 20 || req.Age > 80 {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		id := ulid.MustNew(ulid.Timestamp(time.Now()), entropy).String()
 
 		tx, err := database.Db.Begin()
 		if err != nil {
@@ -89,7 +94,7 @@ func posttweet(w http.ResponseWriter, r *http.Request) {
 		}
 		defer tx.Rollback()
 
-		_, err = tx.Exec("INSERT INTO Tweet ( uid, content) VALUES ( ?, ?)", req.Uid, req.Content)
+		_, err = tx.Exec("INSERT INTO user (id, name, age) VALUES (?, ?, ?)", id, req.Name, req.Age)
 		if err != nil {
 			log.Printf("fail: tx.Exec, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -102,7 +107,7 @@ func posttweet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		resp := map[string]string{"id": req.Uid}
+		resp := map[string]string{"id": id}
 		bytes, err := json.Marshal(resp)
 		if err != nil {
 			log.Printf("fail: json.Marshal, %v\n", err)
@@ -119,7 +124,7 @@ func posttweet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getAllTweets(w http.ResponseWriter, r *http.Request) {
+func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -128,26 +133,17 @@ func getAllTweets(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	case http.MethodGet:
-
-		uid := r.URL.Query().Get("uid") // To be filled
-		if uid == "" {
-			log.Println("fail: uid is empty")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		rows, err := database.Db.Query("SELECT tweet_id,uid,content,created_at,likes_count FROM Tweet WHERE uid = ?", uid)
+		rows, err := database.Db.Query("SELECT id, name, age FROM user")
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		users := make([]models.TweetListForHTTPGET, 0)
+		users := make([]models.UserResForHTTPGet, 0)
 		for rows.Next() {
-			var u models.TweetListForHTTPGET
-			var createdAt []byte // まずバイト列で受け取る
-			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Content, &createdAt, &u.Likes_count); err != nil {
+			var u models.UserResForHTTPGet
+			if err := rows.Scan(&u.Id, &u.Name, &u.Age); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
@@ -156,15 +152,6 @@ func getAllTweets(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-			// バイト列から time.Time に変換
-			u.Created_at, err = time.Parse("2006-01-02 15:04:05", string(createdAt)) // 必要に応じてフォーマットを変更
-			if err != nil {
-				log.Printf("fail: time.Parse, %v\n", err)
-				rows.Close()
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-
 			users = append(users, u)
 		}
 
@@ -182,43 +169,4 @@ func getAllTweets(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-}
-
-func main() {
-
-	if err := database.InitDB(); err != nil {
-		log.Fatal("Error initializing database: ", err)
-	}
-
-	// ② /userでリクエストされたらnameパラメーターと一致する名前を持つレコードをJSON形式で返す
-	http.HandleFunc("/user", handler.Handler)
-	http.HandleFunc("/users", handler.GetAllUsers)
-	http.HandleFunc("/register", handler.Register)
-	http.HandleFunc("/posttweet", posttweet)
-	http.HandleFunc("/tweetlist", getAllTweets)
-
-	// ③ Ctrl+CでHTTPサーバー停止時にDBをクローズする
-	closeDBWithSysCall()
-
-	// 8000番ポートでリクエストを待ち受ける
-	log.Println("Listening...")
-	if err := http.ListenAndServe(":8000", nil); err != nil {
-		log.Fatal(err)
-	}
-}
-
-// ③ Ctrl+CでHTTPサーバー停止時にDBをクローズする
-func closeDBWithSysCall() {
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)
-	go func() {
-		s := <-sig
-		log.Printf("received syscall, %v", s)
-
-		if err := database.Db.Close(); err != nil {
-			log.Fatal(err)
-		}
-		log.Printf("success: db.Close()")
-		os.Exit(0)
-	}()
 }
