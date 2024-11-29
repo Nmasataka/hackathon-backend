@@ -46,5 +46,6 @@ func InitDB() error {
 		log.Fatalf("fail: _db.Ping, %v\n", err)
 	}
 	Db = _db
+	log.Printf("hogehoge")
 	return nil
 }
