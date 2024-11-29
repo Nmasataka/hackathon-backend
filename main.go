@@ -80,6 +80,7 @@ func posttweet(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		log.Printf("ポストはされている")
 
 		tx, err := database.Db.Begin()
 		if err != nil {
@@ -100,6 +101,8 @@ func posttweet(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
+		log.Printf("kakuninn%s", req.Uid)
 
 		resp := map[string]string{"id": req.Uid}
 		bytes, err := json.Marshal(resp)
