@@ -183,7 +183,6 @@ func getAllTweets(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
 	if err := database.InitDB(); err != nil {
 		log.Fatal("Error initializing database: ", err)
 	}
