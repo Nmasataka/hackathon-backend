@@ -32,6 +32,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		log.Printf("nakamuradayo")
 
 		// ②-2
 		rows, err := database.Db.Query("SELECT id, name, age FROM user WHERE name = ?", name)
@@ -40,6 +41,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		log.Printf("masatakadayo")
 
 		// ②-3
 		users := make([]models.UserResForHTTPGet, 0)
