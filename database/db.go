@@ -18,7 +18,8 @@ func InitDB() error {
 	mysqlHost := os.Getenv("MYSQL_HOST")
 	mysqlDatabase := os.Getenv("MYSQL_DATABASE")
 	log.Printf("mysqlUser: %s, mysqlUserPwd: %s, mysqlHost: %s, mysqlDatabase: %s", mysqlUser, mysqlUserPwd, mysqlHost, mysqlDatabase)
-
+	log.Printf("puma%s", mysqlDatabase)
+	log.Printf("%s:%s@%s/%s", mysqlUser, mysqlUserPwd, mysqlHost, mysqlDatabase)
 	connStr := fmt.Sprintf("%s:%s@%s/%s", mysqlUser, mysqlUserPwd, mysqlHost, mysqlDatabase)
 	_db, err := sql.Open("mysql", connStr)
 
