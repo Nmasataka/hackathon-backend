@@ -1,4 +1,4 @@
-module db
+module hackathon-backend
 
 go 1.23.0
 
