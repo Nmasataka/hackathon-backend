@@ -131,24 +131,85 @@ func getAllTweets(w http.ResponseWriter, r *http.Request) {
 		return
 	case http.MethodGet:
 		uid := r.URL.Query().Get("uid") // To be filled
-		if uid == "" {
+		postuid := r.URL.Query().Get("postuid")
+		if uid == "" || postuid == "" {
 			log.Println("fail: uid is empty")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		rows, err := database.Db.Query("SELECT tweet_id,uid,content,created_at,likes_count FROM Tweet WHERE uid = ?", uid)
+		var condition string
+		var args []interface{}
+
+		if postuid == "all" {
+			condition = "1 = 1"
+		} else {
+			condition = "t.uid = ?"
+			args = append(args, postuid)
+		}
+
+		query := `SELECT 
+            t.tweet_id,
+            t.uid AS profile_uid,
+			u.username AS username,
+            t.content,
+            t.created_at,
+            t.likes_count,
+			t.retweet_count,
+            CASE WHEN l.uid IS NOT NULL THEN TRUE ELSE FALSE END AS liked_by_user
+        FROM 
+            Tweet t
+        LEFT JOIN 
+            Likes l
+        ON 
+            t.tweet_id = l.tweet_id AND l.uid = ?
+		LEFT JOIN 
+			User u
+		ON 
+			t.uid = u.uid
+        WHERE 
+            ` + condition + `
+        ORDER BY 
+            t.created_at DESC;
+    `
+
+		args = append([]interface{}{uid}, args...)
+		//rows, err := database.Db.Query("SELECT tweet_id,uid,content,created_at,likes_count FROM Tweet WHERE uid = ?", uid)
+		rows, err := database.Db.Query(query, args...)
+		/*
+					rows, err := database.Db.Query(`
+			        SELECT
+			            t.tweet_id,
+			            t.uid AS profile_uid,
+			            t.content,
+			            t.created_at,
+			            t.likes_count,
+						t.retweet_count,
+			            CASE WHEN l.uid IS NOT NULL THEN TRUE ELSE FALSE END AS liked_by_user
+			        FROM
+			            Tweet t
+			        LEFT JOIN
+			            Likes l
+			        ON
+			            t.tweet_id = l.tweet_id AND l.uid = ?
+			        WHERE
+			            t.uid = ?
+			        ORDER BY
+			            t.created_at DESC;
+			    `, uid, postuid)
+
+		*/
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		tweets := make([]models.TweetListForHTTPGET, 0)
+		tweets := make([]models.TweetWithLikeStatus, 0)
 		for rows.Next() {
-			var u models.TweetListForHTTPGET
+			var u models.TweetWithLikeStatus
 			var createdAt []byte // まずバイト列で受け取る
-			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Content, &createdAt, &u.Likes_count); err != nil {
+			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Username, &u.Content, &createdAt, &u.Likes_count, &u.Retweet_count, &u.IsLiked); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
@@ -196,6 +257,13 @@ func main() {
 	http.HandleFunc("/register", handler.Register)
 	http.HandleFunc("/posttweet", posttweet)
 	http.HandleFunc("/tweetlist", getAllTweets)
+
+	http.HandleFunc("/like", handler.Like)
+	http.HandleFunc("/tweet", handler.GetTweet)
+	http.HandleFunc("/reply", handler.Replytweet)
+	http.HandleFunc("/replylist", handler.GetAllReplyTweets)
+	http.HandleFunc("/register-userinfo", handler.RegisterUserInfo)
+	http.HandleFunc("/loginusername", handler.FetchUsername)
 
 	// ③ Ctrl+CでHTTPサーバー停止時にDBをクローズする
 	closeDBWithSysCall()
