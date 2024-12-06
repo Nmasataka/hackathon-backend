@@ -182,6 +182,7 @@ func FetchUsername(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 
 		uid := r.URL.Query().Get("uid")
+		login_uid := r.URL.Query().Get("login")
 
 		if uid == "" {
 			log.Println("fail: uid is empty")
@@ -189,7 +190,20 @@ func FetchUsername(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		rows, err := database.Db.Query("SELECT uid, email,username,bio,created_at FROM User WHERE uid = ?", uid)
+		rows, err := database.Db.Query(`
+
+		SELECT 
+            t.uid,t.email, t.username, t.bio,t.created_at,
+			t.follow_count,t.follower_count,
+            CASE WHEN l.follower_uid IS NOT NULL  THEN TRUE ELSE FALSE END AS liked_by_user
+        FROM 
+            User t
+        LEFT JOIN 
+            Follow l
+        ON 
+            l.follower_uid = ? AND l.followed_uid = t.uid
+        WHERE 
+            t.uid = ?`, login_uid, uid)
 
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
@@ -201,7 +215,7 @@ func FetchUsername(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			var u models.FetchUsernameForHTTPGet
 			var createdAt []byte // まずバイト列で受け取る
-			if err := rows.Scan(&u.Uid, &u.Email, &u.Username, &u.Bio, &createdAt); err != nil {
+			if err := rows.Scan(&u.Uid, &u.Email, &u.Username, &u.Bio, &createdAt, &u.Follow_count, &u.Followed_count, &u.Isfollow); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
 					log.Printf("fail: rows.Close(), %v\n", err)

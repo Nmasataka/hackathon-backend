@@ -136,10 +136,31 @@ func GetAllReplyTweets(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		//rows, err := database.Db.Query("SELECT tweet_id,uid,content,created_at,likes_count FROM Tweet WHERE uid = ?", uid)
+		//rows, err := database.Db.Query(`select reply_id, uid, content,created_at,likes_count
+		//from Reply where parent_tweet_id = ?`, id)
 
-		rows, err := database.Db.Query(`select reply_id, uid, content,created_at,likes_count
- from Reply where parent_tweet_id = ?`, id)
+		rows, err := database.Db.Query(`SELECT
+			            t.reply_id,
+			            t.uid AS profile_uid,
+						u.username AS username,
+			            t.content,
+			            t.created_at,
+			            t.likes_count,
+			            CASE WHEN l.uid IS NOT NULL THEN TRUE ELSE FALSE END AS liked_by_user
+			        FROM
+			            Reply t
+			        LEFT JOIN
+			            ReplyLikes l
+			        ON
+			            t.reply_id = l.reply_id AND l.uid = ?
+					LEFT JOIN 
+						User u
+					ON 
+						t.uid = u.uid
+			        WHERE
+			            t.parent_tweet_id = ?
+			        ORDER BY
+			            t.created_at DESC;`, uid, id)
 
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
@@ -151,7 +172,7 @@ func GetAllReplyTweets(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			var u models.ReplyListForHTTPGET
 			var createdAt []byte // まずバイト列で受け取る
-			if err := rows.Scan(&u.Reply_id, &u.Uid, &u.Content, &createdAt, &u.Likes_count); err != nil {
+			if err := rows.Scan(&u.Reply_id, &u.Uid, &u.Username, &u.Content, &createdAt, &u.Likes_count, &u.IsLiked); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要

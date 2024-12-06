@@ -3,11 +3,14 @@ package models
 import "time"
 
 type FetchUsernameForHTTPGet struct {
-	Uid        string    `json:"uid"`
-	Email      string    `json:"email"`
-	Username   string    `json:"username"`
-	Bio        string    `json:"bio"`
-	Created_at time.Time `json:"created_at"`
+	Uid            string    `json:"uid"`
+	Email          string    `json:"email"`
+	Username       string    `json:"username"`
+	Bio            string    `json:"bio"`
+	Created_at     time.Time `json:"created_at"`
+	Follow_count   int       `json:"follow_count"`
+	Followed_count int       `json:"followed_count"`
+	Isfollow       bool      `json:"isfollow"`
 }
 
 type UserResForHTTPGet struct {
@@ -76,7 +79,19 @@ type ReplytweetForHTTPPOST struct {
 type ReplyListForHTTPGET struct {
 	Reply_id    int       `json:"reply_id"`
 	Uid         string    `json:"uid"`
+	Username    string    `json:"username"`
 	Content     string    `json:"content"`
 	Created_at  time.Time `json:"created_at"`
 	Likes_count int       `json:"likes_count"`
+	IsLiked     bool      `json:"isLiked"`
+}
+
+type FollowForHTTPPOST struct {
+	Follower_uid string `json:"follower_uid"`
+	Followed_uid string `json:"followed_uid"`
+}
+
+type FollowerListForHTTPGET struct {
+	Uid      string `json:"uid"`
+	Username string `json:"username"`
 }

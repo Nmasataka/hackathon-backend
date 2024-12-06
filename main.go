@@ -259,11 +259,18 @@ func main() {
 	http.HandleFunc("/tweetlist", getAllTweets)
 
 	http.HandleFunc("/like", handler.Like)
+	http.HandleFunc("/replylike", handler.ReplyLike)
 	http.HandleFunc("/tweet", handler.GetTweet)
 	http.HandleFunc("/reply", handler.Replytweet)
 	http.HandleFunc("/replylist", handler.GetAllReplyTweets)
 	http.HandleFunc("/register-userinfo", handler.RegisterUserInfo)
 	http.HandleFunc("/loginusername", handler.FetchUsername)
+
+	http.HandleFunc("/follow", handler.Follow)
+	http.HandleFunc("/followtweetlist", handler.GetAllFollowTweets)
+
+	http.HandleFunc("/following", handler.GetAllFollowing)
+	http.HandleFunc("/followers", handler.GetAllFollower)
 
 	// ③ Ctrl+CでHTTPサーバー停止時にDBをクローズする
 	closeDBWithSysCall()
