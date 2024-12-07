@@ -37,7 +37,7 @@ func GetTweet(w http.ResponseWriter, r *http.Request) {
         t.content,
         t.created_at,
         t.likes_count,
-		t.retweet_count,
+		t.retweet_count,t.image_url,
         CASE WHEN l.uid IS NOT NULL THEN TRUE ELSE FALSE END AS liked_by_user
     FROM 
         Tweet t
@@ -60,7 +60,7 @@ func GetTweet(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			var u models.TweetWithLikeStatus
 			var createdAt []byte // まずバイト列で受け取る
-			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Username, &u.ProfilePicture, &u.Content, &createdAt, &u.Likes_count, &u.Retweet_count, &u.IsLiked); err != nil {
+			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Username, &u.ProfilePicture, &u.Content, &createdAt, &u.Likes_count, &u.Retweet_count, &u.Image_url, &u.IsLiked); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
 					log.Printf("fail: rows.Close(), %v\n", err)
@@ -131,7 +131,7 @@ func GetAllTweets(w http.ResponseWriter, r *http.Request) {
             t.content,
             t.created_at,
             t.likes_count,
-			t.retweet_count,
+			t.retweet_count,t.image_url,
             CASE WHEN l.uid IS NOT NULL THEN TRUE ELSE FALSE END AS liked_by_user
         FROM 
             Tweet t
@@ -163,7 +163,7 @@ func GetAllTweets(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			var u models.TweetWithLikeStatus
 			var createdAt []byte // まずバイト列で受け取る
-			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Username, &u.ProfilePicture, &u.Content, &createdAt, &u.Likes_count, &u.Retweet_count, &u.IsLiked); err != nil {
+			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Username, &u.ProfilePicture, &u.Content, &createdAt, &u.Likes_count, &u.Retweet_count, &u.Image_url, &u.IsLiked); err != nil {
 				log.Printf("ここ")
 				log.Printf("fail: rows.Scan, %v\n", err)
 

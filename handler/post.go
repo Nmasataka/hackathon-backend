@@ -78,7 +78,7 @@ func Posttweet(w http.ResponseWriter, r *http.Request) {
 		}
 		defer tx.Rollback()
 
-		_, err = tx.Exec("INSERT INTO Tweet ( uid, content) VALUES ( ?, ?)", req.Uid, req.Content)
+		_, err = tx.Exec("INSERT INTO Tweet ( uid, content, image_url) VALUES ( ?, ?,?)", req.Uid, req.Content, req.Imageurl)
 		if err != nil {
 			log.Printf("fail: tx.Exec, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
