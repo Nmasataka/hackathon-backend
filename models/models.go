@@ -7,6 +7,7 @@ type FetchUsernameForHTTPGet struct {
 	Email          string    `json:"email"`
 	Username       string    `json:"username"`
 	Bio            string    `json:"bio"`
+	ProfilePicture string    `json:"profilePicture"`
 	Created_at     time.Time `json:"created_at"`
 	Follow_count   int       `json:"follow_count"`
 	Followed_count int       `json:"followed_count"`
@@ -33,6 +34,7 @@ type RegisterUserInfoFromHTTPPost struct {
 	Uid      string `json:"uid"`
 	Username string `json:"username"`
 	Bio      string `json:"bio"`
+	Profile  string `json:"profile"`
 }
 
 type LoginForHTTPGET struct {
@@ -60,14 +62,15 @@ type LikeForHTTPPOST struct {
 }
 
 type TweetWithLikeStatus struct {
-	Tweet_id      int       `json:"tweet_id"`
-	Uid           string    `json:"uid"`
-	Username      string    `json:"username"`
-	Content       string    `json:"content"`
-	Created_at    time.Time `json:"created_at"`
-	Likes_count   int       `json:"likes_count"`
-	Retweet_count int       `json:"retweet_count"`
-	IsLiked       bool      `json:"isLiked"`
+	Tweet_id       int       `json:"tweet_id"`
+	Uid            string    `json:"uid"`
+	Username       string    `json:"username"`
+	ProfilePicture string    `json:"profilePicture"`
+	Content        string    `json:"content"`
+	Created_at     time.Time `json:"created_at"`
+	Likes_count    int       `json:"likes_count"`
+	Retweet_count  int       `json:"retweet_count"`
+	IsLiked        bool      `json:"isLiked"`
 }
 
 type ReplytweetForHTTPPOST struct {
@@ -92,8 +95,9 @@ type FollowForHTTPPOST struct {
 }
 
 type FollowerListForHTTPGET struct {
-	Uid      string `json:"uid"`
-	Username string `json:"username"`
+	Uid            string `json:"uid"`
+	Username       string `json:"username"`
+	ProfilePicture string `json:"profilePicture"`
 }
 
 type Gemini_Request struct {

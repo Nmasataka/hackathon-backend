@@ -152,7 +152,7 @@ func RegisterUserInfo(w http.ResponseWriter, r *http.Request) {
 		}
 		defer tx.Rollback()
 
-		_, err = tx.Exec("UPDATE User SET username = ?,bio = ? where uid = ? ", req.Username, req.Bio, req.Uid)
+		_, err = tx.Exec("UPDATE User SET username = ?,bio = ?,profile_picture = ? where uid = ? ", req.Username, req.Bio, req.Profile, req.Uid)
 		if err != nil {
 			log.Printf("fail: tx.Exec, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)

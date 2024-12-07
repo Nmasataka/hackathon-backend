@@ -193,7 +193,7 @@ func FetchUsername(w http.ResponseWriter, r *http.Request) {
 		rows, err := database.Db.Query(`
 
 		SELECT 
-            t.uid,t.email, t.username, t.bio,t.created_at,
+            t.uid,t.email, t.username, t.bio,t.profile_picture,t.created_at,
 			t.follow_count,t.follower_count,
             CASE WHEN l.follower_uid IS NOT NULL  THEN TRUE ELSE FALSE END AS liked_by_user
         FROM 
@@ -215,7 +215,7 @@ func FetchUsername(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			var u models.FetchUsernameForHTTPGet
 			var createdAt []byte // まずバイト列で受け取る
-			if err := rows.Scan(&u.Uid, &u.Email, &u.Username, &u.Bio, &createdAt, &u.Follow_count, &u.Followed_count, &u.Isfollow); err != nil {
+			if err := rows.Scan(&u.Uid, &u.Email, &u.Username, &u.Bio, &u.ProfilePicture, &createdAt, &u.Follow_count, &u.Followed_count, &u.Isfollow); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
 					log.Printf("fail: rows.Close(), %v\n", err)
