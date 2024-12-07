@@ -95,3 +95,7 @@ type FollowerListForHTTPGET struct {
 	Uid      string `json:"uid"`
 	Username string `json:"username"`
 }
+
+type Gemini_Request struct {
+	Prompt string `json:"prompt"`
+}
