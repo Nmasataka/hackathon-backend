@@ -33,6 +33,7 @@ func GetTweet(w http.ResponseWriter, r *http.Request) {
         t.tweet_id,
         t.uid AS profile_uid,
 		u.username AS username,
+		u.profile_picture,
         t.content,
         t.created_at,
         t.likes_count,
@@ -59,7 +60,7 @@ func GetTweet(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			var u models.TweetWithLikeStatus
 			var createdAt []byte // まずバイト列で受け取る
-			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Username, &u.Content, &createdAt, &u.Likes_count, &u.Retweet_count, &u.IsLiked); err != nil {
+			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Username, &u.ProfilePicture, &u.Content, &createdAt, &u.Likes_count, &u.Retweet_count, &u.IsLiked); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
 					log.Printf("fail: rows.Close(), %v\n", err)
@@ -126,6 +127,7 @@ func GetAllTweets(w http.ResponseWriter, r *http.Request) {
             t.tweet_id,
             t.uid AS profile_uid,
 			u.username AS username,
+			u.profile_picture,
             t.content,
             t.created_at,
             t.likes_count,
@@ -161,7 +163,7 @@ func GetAllTweets(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			var u models.TweetWithLikeStatus
 			var createdAt []byte // まずバイト列で受け取る
-			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Username, &u.Content, &createdAt, &u.Likes_count, &u.Retweet_count, &u.IsLiked); err != nil {
+			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Username, &u.ProfilePicture, &u.Content, &createdAt, &u.Likes_count, &u.Retweet_count, &u.IsLiked); err != nil {
 				log.Printf("ここ")
 				log.Printf("fail: rows.Scan, %v\n", err)
 

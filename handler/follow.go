@@ -180,12 +180,13 @@ func GetAllFollowTweets(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		log.Printf("%s", uid)
 
 		rows, err := database.Db.Query(`
 			        SELECT
 			            t.tweet_id,
 			            t.uid AS profile_uid,
-						u.username,
+						u.username,u.profile_picture,
 			            t.content,
 			            t.created_at,
 			            t.likes_count,
@@ -198,10 +199,10 @@ func GetAllFollowTweets(w http.ResponseWriter, r *http.Request) {
 			        ON
 			            t.tweet_id = l.tweet_id AND l.uid = ?
 					
-					JOIN Follow f ON t.uid = f.followed_uid
+					JOIN Follow f ON t.uid = f.followed_uid AND f.follower_uid = ?
 					LEFT JOIN User u ON t.uid = u.uid
 			        ORDER BY
-			            t.created_at DESC;`, uid)
+			            t.created_at DESC;`, uid, uid)
 
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
@@ -213,7 +214,7 @@ func GetAllFollowTweets(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			var u models.TweetWithLikeStatus
 			var createdAt []byte // まずバイト列で受け取る
-			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Username, &u.Content, &createdAt, &u.Likes_count, &u.Retweet_count, &u.IsLiked); err != nil {
+			if err := rows.Scan(&u.Tweet_id, &u.Uid, &u.Username, &u.ProfilePicture, &u.Content, &createdAt, &u.Likes_count, &u.Retweet_count, &u.IsLiked); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
@@ -268,7 +269,7 @@ func GetAllFollower(w http.ResponseWriter, r *http.Request) {
 
 		rows, err := database.Db.Query(`
 			        SELECT
-			            u.uid,u.username
+			            u.uid,u.username,u.profile_picture
 			        FROM
 			            User u
 			        INNER JOIN
@@ -285,7 +286,7 @@ func GetAllFollower(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			var u models.FollowerListForHTTPGET
 
-			if err := rows.Scan(&u.Uid, &u.Username); err != nil {
+			if err := rows.Scan(&u.Uid, &u.Username, &u.ProfilePicture); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
@@ -339,7 +340,7 @@ func GetAllFollowing(w http.ResponseWriter, r *http.Request) {
 
 		rows, err := database.Db.Query(`
 			        SELECT
-			            u.uid,u.username
+			            u.uid,u.username,u.profile_picture
 			        FROM
 			            User u
 			        INNER JOIN
@@ -356,7 +357,7 @@ func GetAllFollowing(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			var u models.FollowerListForHTTPGET
 
-			if err := rows.Scan(&u.Uid, &u.Username); err != nil {
+			if err := rows.Scan(&u.Uid, &u.Username, &u.ProfilePicture); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
