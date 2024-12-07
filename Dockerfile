@@ -18,7 +18,11 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /main-app
 # 実行ステージ
 FROM debian:bullseye-slim
 
+
+
 WORKDIR /app
+
+RUN apt-get update && apt-get install ca-certificates openssl
 
 # ビルドしたバイナリをコピー
 COPY --from=build /main-app .
