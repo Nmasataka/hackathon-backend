@@ -82,7 +82,7 @@ func generateContentFromText(projectID, promptText string) (string, error) {
 	// Geminiにプロンプトを送信
 	gemini := client.GenerativeModel(modelName)
 	prompt := genai.Text(promptText)
-	log.Printf("prompt")
+	log.Printf("prompt%s", prompt)
 	resp, err := gemini.GenerateContent(ctx, prompt)
 	log.Printf("generate")
 	if err != nil {
