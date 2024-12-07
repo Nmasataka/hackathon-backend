@@ -47,8 +47,8 @@ func HandleGenerate(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		log.Printf("ポストはされている")
-		log.Printf("aaaaaaaa%s", req.Prompt)
+
+		log.Printf("ポスト内容%s", req.Prompt)
 
 		// Geminiにプロンプトを送信
 		resp, err := generateContentFromText(projectID, req.Prompt)
@@ -58,7 +58,7 @@ func HandleGenerate(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		log.Printf("まさか")
+		log.Printf("読めている")
 
 		// 応答をJSON形式で返す
 		response := GenerateResponse{Response: resp}
@@ -82,13 +82,13 @@ func generateContentFromText(projectID, promptText string) (string, error) {
 	// Geminiにプロンプトを送信
 	gemini := client.GenerativeModel(modelName)
 	prompt := genai.Text(promptText)
-	log.Printf("おれか")
+	log.Printf("prompt")
 	resp, err := gemini.GenerateContent(ctx, prompt)
-	log.Printf("おまえか")
+	log.Printf("generate")
 	if err != nil {
 		return "", fmt.Errorf("error generating content: %w", err)
 	}
-	log.Printf("hogehoge")
+	log.Printf("generateできていない")
 	// デバッグ用に返り値をJSON形式で出力
 	respJSON, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
