@@ -35,10 +35,8 @@ func InitDB() error {
 			log.Fatal("Environment variables MYSQL_USER, MYSQL_PASSWORD, and MYSQL_DATABASE must be set")
 		}
 
-		// ①-2
 		_db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@(localhost:3306)/%s", mysqlUser, mysqlUserPwd, mysqlDatabase))
 		//ここまでコメントアウト
-
 	*/
 	if err != nil {
 		log.Fatalf("fail: sql.Open, %v\n", err)
