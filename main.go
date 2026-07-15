@@ -38,6 +38,8 @@ func main() {
 	http.HandleFunc("/following", handler.GetAllFollowing)
 	http.HandleFunc("/followers", handler.GetAllFollower)
 	http.HandleFunc("/generate", handler.HandleGenerate)
+	http.HandleFunc("/searchtweetlist", handler.GetAllSearchTweet)
+	http.HandleFunc("/searchuserlist", handler.SearchUser)
 
 	// ③ Ctrl+CでHTTPサーバー停止時にDBをクローズする
 	closeDBWithSysCall()

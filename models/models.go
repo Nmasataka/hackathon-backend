@@ -42,8 +42,9 @@ type LoginForHTTPGET struct {
 }
 
 type TweetForHTTPPOST struct {
-	Uid     string `json:"uid"`
-	Content string `json:"content"`
+	Uid      string `json:"uid"`
+	Content  string `json:"content"`
+	Imageurl string `json:"imageurl"`
 }
 
 type TweetListForHTTPGET struct {
@@ -70,6 +71,7 @@ type TweetWithLikeStatus struct {
 	Created_at     time.Time `json:"created_at"`
 	Likes_count    int       `json:"likes_count"`
 	Retweet_count  int       `json:"retweet_count"`
+	Image_url      string    `json:"image_url"`
 	IsLiked        bool      `json:"isLiked"`
 }
 
@@ -80,13 +82,14 @@ type ReplytweetForHTTPPOST struct {
 }
 
 type ReplyListForHTTPGET struct {
-	Reply_id    int       `json:"reply_id"`
-	Uid         string    `json:"uid"`
-	Username    string    `json:"username"`
-	Content     string    `json:"content"`
-	Created_at  time.Time `json:"created_at"`
-	Likes_count int       `json:"likes_count"`
-	IsLiked     bool      `json:"isLiked"`
+	Reply_id       int       `json:"reply_id"`
+	Uid            string    `json:"uid"`
+	Username       string    `json:"username"`
+	ProfilePicture string    `json:"profilePicture"`
+	Content        string    `json:"content"`
+	Created_at     time.Time `json:"created_at"`
+	Likes_count    int       `json:"likes_count"`
+	IsLiked        bool      `json:"isLiked"`
 }
 
 type FollowForHTTPPOST struct {

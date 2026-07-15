@@ -142,7 +142,7 @@ func GetAllReplyTweets(w http.ResponseWriter, r *http.Request) {
 		rows, err := database.Db.Query(`SELECT
 			            t.reply_id,
 			            t.uid AS profile_uid,
-						u.username AS username,
+						u.username AS username,u.profile_picture,
 			            t.content,
 			            t.created_at,
 			            t.likes_count,
@@ -172,7 +172,7 @@ func GetAllReplyTweets(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			var u models.ReplyListForHTTPGET
 			var createdAt []byte // まずバイト列で受け取る
-			if err := rows.Scan(&u.Reply_id, &u.Uid, &u.Username, &u.Content, &createdAt, &u.Likes_count, &u.IsLiked); err != nil {
+			if err := rows.Scan(&u.Reply_id, &u.Uid, &u.Username, &u.ProfilePicture, &u.Content, &createdAt, &u.Likes_count, &u.IsLiked); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要

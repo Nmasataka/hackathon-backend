@@ -10,7 +10,7 @@ import (
 var Db *sql.DB
 
 func InitDB() error {
-	
+
 	mysqlUser := os.Getenv("MYSQL_USER")
 	mysqlUserPwd := os.Getenv("MYSQL_PWD")
 	mysqlHost := os.Getenv("MYSQL_HOST")
