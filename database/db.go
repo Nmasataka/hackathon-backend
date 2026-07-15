@@ -11,6 +11,7 @@ var Db *sql.DB
 
 func InitDB() error {
 
+	// GCP用(Cloud版)
 	mysqlUser := os.Getenv("MYSQL_USER")
 	mysqlUserPwd := os.Getenv("MYSQL_PWD")
 	mysqlHost := os.Getenv("MYSQL_HOST")
@@ -20,24 +21,21 @@ func InitDB() error {
 	log.Printf("%s:%s@%s/%s", mysqlUser, mysqlUserPwd, mysqlHost, mysqlDatabase)
 	connStr := fmt.Sprintf("%s:%s@%s/%s", mysqlUser, mysqlUserPwd, mysqlHost, mysqlDatabase)
 	_db, err := sql.Open("mysql", connStr)
+	// GCP用(Cloud版)ここまで
 
-	//ここからコメントアウト
-	/*
-		if err := godotenv.Load(".env"); err != nil {
-			log.Fatalf("Error loading .env file: %v", err)
-		}
+	// Local実行版
+	// if err := godotenv.Load(".env"); err != nil {
+	// 	log.Fatalf("Error loading .env file: %v", err)
+	// }
+	// mysqlUser := os.Getenv("MYSQL_USER")
+	// mysqlUserPwd := os.Getenv("MYSQL_PASSWORD")
+	// mysqlDatabase := os.Getenv("MYSQL_DATABASE")
+	// if mysqlUser == "" || mysqlUserPwd == "" || mysqlDatabase == "" {
+	// 	log.Fatal("Environment variables MYSQL_USER, MYSQL_PASSWORD, and MYSQL_DATABASE must be set")
+	// }
+	// _db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@(localhost:3306)/%s", mysqlUser, mysqlUserPwd, mysqlDatabase))
+	// Local実行版ここまで
 
-		mysqlUser := os.Getenv("MYSQL_USER")
-		mysqlUserPwd := os.Getenv("MYSQL_PASSWORD")
-		mysqlDatabase := os.Getenv("MYSQL_DATABASE")
-
-		if mysqlUser == "" || mysqlUserPwd == "" || mysqlDatabase == "" {
-			log.Fatal("Environment variables MYSQL_USER, MYSQL_PASSWORD, and MYSQL_DATABASE must be set")
-		}
-
-		_db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@(localhost:3306)/%s", mysqlUser, mysqlUserPwd, mysqlDatabase))
-		//ここまでコメントアウト
-	*/
 	if err != nil {
 		log.Fatalf("fail: sql.Open, %v\n", err)
 	}
